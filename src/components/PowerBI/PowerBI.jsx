@@ -46,12 +46,22 @@ const PowerBIEmbed = ({ embedInfo }) => {
       const reportPages = await report.getPages();
       setPages(reportPages);
       setSelectedPage(reportPages[0]?.name || "");
+    });
 
-      const selectionData = event.detail.dataPoints.map((dp) => ({
-        measure: dp.target.measure,
-        table: dp.target.table,
-        value: dp.formattedValue,
-      }));
+    report.on("dataSelected", (event) => {
+      const dataPoints = event.detail?.dataPoints || [];
+
+      const selectionData = dataPoints.flatMap((dp) => {
+        console.log("🔍 RAW VALUE OBJECTS:", dp.values); // ✅ RIGHT HERE
+
+        return (dp.values || []).map((val) => ({
+          measure: val.target?.measure || "Unknown",
+          table: val.target?.table || "Unknown",
+          value: val.formattedValue || val.value || "N/A",
+        }));
+      });
+      setSelection(selectionData);
+      console.log("🟢 User selected:", selectionData);
     });
 
     return () => {
@@ -90,6 +100,18 @@ const PowerBIEmbed = ({ embedInfo }) => {
               </option>
             ))}
           </select>
+        </div>
+      )}
+      {selection && (
+        <div className="selection-panel">
+          <h3>Selected Data</h3>
+          <ul>
+            {selection.map((item, index) => (
+              <li key={index}>
+                <strong>{item.measure}</strong> ({item.table}):{item.value}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
       <div ref={reportRef} className="reportClass" />
