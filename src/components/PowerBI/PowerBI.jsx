@@ -90,6 +90,7 @@ const PowerBIEmbed = ({ embedInfo }) => {
                 id="pageSelector"
                 value={selectedPage}
                 onChange={handlePageChange}
+                className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 {pages.map((page) => (
                   <option key={page.name} value={page.name}>
