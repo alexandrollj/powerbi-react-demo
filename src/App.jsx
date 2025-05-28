@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div>
-      <h1>Power BI Report</h1>
+      <h1 className="text-red-950">{embedInfo.reportTitle}</h1>
       <PowerBIEmbed embedInfo={embedInfo} />
     </div>
   );

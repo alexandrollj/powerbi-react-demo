@@ -13,9 +13,6 @@ const PowerBIEmbed = ({ embedInfo }) => {
     const powerbiService = window.powerbi; // used for .embed()
     const powerbiSdk = window["powerbi-client"]; // used for .models.TokenType
 
-    console.log("powerbiService", powerbiService);
-    console.log("powerbi", powerbiSdk);
-
     if (!powerbiService?.embed || !powerbiSdk?.models?.TokenType) {
       console.error("Power BI SDK not fully loaded");
       return;
@@ -41,6 +38,7 @@ const PowerBIEmbed = ({ embedInfo }) => {
     // 💡 Log details once the report is loaded
     report.on("loaded", async () => {
       console.log("Report loaded ✅");
+      console.log("REPORT DETAILS", report);
 
       // Pages
       const reportPages = await report.getPages();
@@ -61,7 +59,6 @@ const PowerBIEmbed = ({ embedInfo }) => {
         }));
       });
       setSelection(selectionData);
-      console.log("🟢 User selected:", selectionData);
     });
 
     return () => {
@@ -78,43 +75,55 @@ const PowerBIEmbed = ({ embedInfo }) => {
     setSelectedPage(newPage);
     try {
       await reportRef.current?.powerBireport.setPage(newPage);
-      console.log("📄 Switched to page:", newPage);
-    } catch (error) {
-      console.log("Failed to switch page", error);
-    }
+    } catch (error) {}
   };
 
   return (
-    <div>
-      {pages.length > 0 && (
-        <div>
-          <label htmlFor="pageSelector">Select Page:</label>
-          <select
-            id="pageSelector"
-            value={selectedPage}
-            onChange={handlePageChange}
-          >
-            {pages.map((page) => (
-              <option key={page.name} value={page.name}>
-                {page.displayName}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen w-full bg-slate-100">
+      <main className="p-6 max-w-screen-xl mx-auto space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="bg-white rounded shadow p-4">
+            <h2 className="text-lg font-bold mb-4">Select Page</h2>
+            {pages.length > 0 && (
+              <select
+                data-theme="light"
+                id="pageSelector"
+                value={selectedPage}
+                onChange={handlePageChange}
+              >
+                {pages.map((page) => (
+                  <option key={page.name} value={page.name}>
+                    {page.displayName}
+                  </option>
+                ))}
+              </select>
+            )}
+          </section>
+          <section className="bg-white rounded shadow p-4">
+            <h2 className=" text-lg font-bold mb-4">Selected Data</h2>
+            {selection?.length > 0 ? (
+              <ul className="space-y-2 list-none">
+                {selection.map((item, index) => (
+                  <li key={index}>
+                    <strong className="text-blue-600">{item.measure}</strong>
+                    <div className="text-sm-gray-600">
+                      {item.table}:{parseFloat(item.value).toFixed(2)}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="italic text-gray-500">No data selected yet.</p>
+            )}
+          </section>
         </div>
-      )}
-      {selection && (
-        <div className="selection-panel">
-          <h3>Selected Data</h3>
-          <ul>
-            {selection.map((item, index) => (
-              <li key={index}>
-                <strong>{item.measure}</strong> ({item.table}):{item.value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <div ref={reportRef} className="reportClass" />
+        <section>
+          <div
+            ref={reportRef}
+            className="w-full h-[600px] border rounded shadow bg-white"
+          />
+        </section>
+      </main>
     </div>
   );
 };
